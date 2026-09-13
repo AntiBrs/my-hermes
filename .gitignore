@@ -1,0 +1,6 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+workspace/MEMORY.md
+workspace/CONTEXT_SUMMARY.md

@@ -51,6 +51,8 @@ Enter a request at the prompt. Type `exit`, `quit`, or `/exit` to close the prog
 
 Shell commands are executed in a Docker container rather than on the host system. The container has no network access, runs as a non-root user, has a read-only base filesystem, and can write only to `workspace/`.
 
+The sandbox includes Python, C and C++ (`gcc` and `g++`), Node.js, Java, Go, Rust, Ruby, PHP, Perl, and common build tools such as `make` and CMake.
+
 Start Docker Desktop, then build the sandbox image once:
 
 ```bash
@@ -82,6 +84,10 @@ Use execute_shell with only this command: g++ -O2 -std=c++17 quicksort.cpp -o qu
 ```
 
 `execute_shell` accepts only the command itself; do not include a timeout value. The command runs for up to 30 seconds. Any generated files remain in `workspace/` after the temporary container exits.
+
+### Docker Desktop
+
+The sandbox image appears under **Images** in Docker Desktop as `my-hermes-sandbox`. Hermes starts short-lived containers with `--rm`, so completed commands do not remain visible under **Containers**. You can run the image manually from Docker Desktop for inspection, but use the documented `docker run` command when you need the same workspace mount and isolation settings that Hermes uses.
 
 ## Project layout
 

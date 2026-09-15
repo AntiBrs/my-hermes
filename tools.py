@@ -284,15 +284,6 @@ TOOL_SCHEMAS = [
                             "Shell command to run inside the sandbox."
                         )
                     },
-                    "timeout_seconds": {
-                        "type": "integer",
-                        "description": (
-                            "Optional command timeout in seconds, from 1 to 60. "
-                            "Default: 30."
-                        ),
-                        "minimum": 1,
-                        "maximum": 60
-                    }
                 },
                 "required": ["command"]
             }

@@ -1,6 +1,6 @@
 import json
 
-from groq import Groq
+from groq import BadRequestError, Groq
 
 from config import (
     GROQ_API_KEY,
@@ -34,6 +34,13 @@ messages = [
 ]
 
 
+TOOL_ARGUMENT_RETRY_PROMPT = """
+Your previous tool call could not be parsed. Retry the request using only the
+parameters declared in the selected tool schema and valid JSON. For
+execute_shell, provide only the command parameter.
+"""
+
+
 def limit_tool_output(result: str) -> str:
     """Keep individual tool results within the configured context budget."""
     if len(result) <= MAX_TOOL_OUTPUT:
@@ -43,6 +50,35 @@ def limit_tool_output(result: str) -> str:
         result[:MAX_TOOL_OUTPUT]
         + "\n\n[Tool output truncated to preserve the context budget.]"
     )
+
+
+def create_completion():
+    """Request a model response and retry one malformed tool call."""
+    request_options = {
+        "model": MODEL,
+        "messages": messages,
+        "tools": TOOL_SCHEMAS,
+        "tool_choice": "auto",
+        "reasoning_effort": "medium",
+    }
+
+    try:
+        return client.chat.completions.create(**request_options)
+    except BadRequestError as error:
+        if "Failed to parse tool call arguments as JSON" not in str(error):
+            raise
+
+    retry_options = {
+        **request_options,
+        "messages": [
+            *messages,
+            {
+                "role": "system",
+                "content": TOOL_ARGUMENT_RETRY_PROMPT,
+            },
+        ],
+    }
+    return client.chat.completions.create(**retry_options)
 
 
 def run_agent(user_message: str) -> str:
@@ -65,15 +101,15 @@ def run_agent(user_message: str) -> str:
         MAX_AGENT_STEPS
     ):
 
-        response = (
-            client.chat.completions.create(
-                model=MODEL,
-                messages=messages,
-                tools=TOOL_SCHEMAS,
-                tool_choice="auto",
-                reasoning_effort="medium",
-            )
-        )
+        try:
+            response = create_completion()
+        except BadRequestError as error:
+            if "Failed to parse tool call arguments as JSON" in str(error):
+                return (
+                    "The requested command could not be formatted correctly. "
+                    "Please try again with a shorter command."
+                )
+            raise
 
         message = (
             response

@@ -61,6 +61,28 @@ After the image is available, Hermes can use its `execute_shell` tool for non-in
 
 Set `SANDBOX_IMAGE` in `.env` only if you build the image with a different tag.
 
+### Running code through Hermes
+
+Place the source file in `workspace/`, then start Hermes from the project root:
+
+```bash
+python agent.py
+```
+
+Ask it to run a command using a direct request such as:
+
+```text
+Use execute_shell with only this command: python example.py
+```
+
+For a C++ program already saved as `workspace/quicksort.cpp`:
+
+```text
+Use execute_shell with only this command: g++ -O2 -std=c++17 quicksort.cpp -o quicksort && ./quicksort
+```
+
+`execute_shell` accepts only the command itself; do not include a timeout value. The command runs for up to 30 seconds. Any generated files remain in `workspace/` after the temporary container exits.
+
 ## Project layout
 
 | Path | Purpose |

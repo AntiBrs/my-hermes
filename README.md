@@ -47,6 +47,20 @@ python agent.py
 
 Enter a request at the prompt. Type `exit`, `quit`, or `/exit` to close the program.
 
+## Shell sandbox
+
+Shell commands are executed in a Docker container rather than on the host system. The container has no network access, runs as a non-root user, has a read-only base filesystem, and can write only to `workspace/`.
+
+Start Docker Desktop, then build the sandbox image once:
+
+```bash
+docker build -t my-hermes-sandbox:latest .
+```
+
+After the image is available, Hermes can use its `execute_shell` tool for non-interactive commands such as running a script or checking a generated file. Commands are limited to 30 seconds by default and cannot access host files outside the workspace.
+
+Set `SANDBOX_IMAGE` in `.env` only if you build the image with a different tag.
+
 ## Project layout
 
 | Path | Purpose |
@@ -54,6 +68,8 @@ Enter a request at the prompt. Type `exit`, `quit`, or `/exit` to close the prog
 | `agent.py` | Command-line entry point and tool-call loop. |
 | `prompts.py` | Core behaviour and operating guidelines. |
 | `tools.py` | Workspace-only file operations exposed to the assistant. |
+| `sandbox.py` | Docker-backed command execution with isolation and resource limits. |
+| `Dockerfile` | Definition of the restricted shell environment. |
 | `context_manager.py` | Conversation summarisation for longer sessions. |
 | `skills/` | Optional task-specific instructions. |
 | `workspace/` | Files available for the assistant to work with. |

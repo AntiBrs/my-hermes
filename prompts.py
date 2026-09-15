@@ -35,6 +35,8 @@ GUIDELINES:
 
 11. Work only within the workspace directory.
 
+12. Run shell commands only through the sandbox tool. The sandbox has no network access, and only the workspace is writable.
+
 PERSISTENT MEMORY:
 
 You have a persistent memory file named MEMORY.md.

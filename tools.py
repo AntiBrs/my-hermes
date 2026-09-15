@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from config import WORKSPACE_DIR
+from sandbox import run_in_sandbox
 
 def execute_tool(
     tool_name: str,
@@ -18,6 +19,9 @@ def execute_tool(
 
     if tool_name == "edit_file":
         return edit_file(**arguments)
+
+    if tool_name == "execute_shell":
+        return run_in_sandbox(**arguments)
 
     return f"Unknown tool: {tool_name}"
 
@@ -259,6 +263,38 @@ TOOL_SCHEMAS = [
                     "old_text",
                     "new_text"
                 ]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "execute_shell",
+            "description": (
+                "Runs a non-interactive shell command inside the isolated "
+                "workspace sandbox. The sandbox has no network access and "
+                "only the workspace is writable."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "command": {
+                        "type": "string",
+                        "description": (
+                            "Shell command to run inside the sandbox."
+                        )
+                    },
+                    "timeout_seconds": {
+                        "type": "integer",
+                        "description": (
+                            "Optional command timeout in seconds, from 1 to 60. "
+                            "Default: 30."
+                        ),
+                        "minimum": 1,
+                        "maximum": 60
+                    }
+                },
+                "required": ["command"]
             }
         }
     },
